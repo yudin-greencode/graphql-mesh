@@ -16,3 +16,7 @@ transforms:
           to:
             type: Query
             field: booksCategories
+sdk:
+  generateOperations:
+    selectionSetDepth: 2 # This is the maximum level of selection set
+

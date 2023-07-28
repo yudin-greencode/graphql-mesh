@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { GraphQLResolveInfo } from 'graphql';
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { gql } from '@graphql-mesh/utils';
 
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -123,9 +125,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
+  String: ResolverTypeWrapper<Scalars['String']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Book: ResolverTypeWrapper<Book>;
-  String: ResolverTypeWrapper<Scalars['String']>;
   Category: ResolverTypeWrapper<Category>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 }>;
@@ -133,9 +135,9 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Query: {};
+  String: Scalars['String'];
   Int: Scalars['Int'];
   Book: Book;
-  String: Scalars['String'];
   Category: Category;
   Boolean: Scalars['Boolean'];
 }>;
@@ -208,6 +210,11 @@ export type Query = {
 };
 
 
+export type QuerybookArgs = {
+  id: Scalars['String'];
+};
+
+
 export type QuerybooksArgs = {
   limit?: InputMaybe<Scalars['Int']>;
 };
@@ -234,7 +241,7 @@ export type Category = {
   /** 
 
 Equivalent to GET /books/{id} **/
-  book: InContextSdkMethod<BooksTypes.Query['book'], {}, MeshContext>,
+  book: InContextSdkMethod<BooksTypes.Query['book'], BooksTypes.QuerybookArgs, MeshContext>,
   /** 
 
 Equivalent to GET /books **/
@@ -311,11 +318,51 @@ export async function getMeshSDK<TGlobalContext = any, TOperationContext = any>(
   const { sdkRequesterFactory } = await getBuiltMesh();
   return getSdk<TOperationContext>(sdkRequesterFactory(globalContext));
 }
+export type books_queryQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type books_queryQuery = { books?: Maybe<Array<Maybe<Pick<Book, 'authorId' | 'categorieId' | 'id' | 'title'>>>> };
+
+export type booksCategories_queryQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type booksCategories_queryQuery = { booksCategories?: Maybe<Array<Maybe<Pick<Category, 'id' | 'name'>>>> };
+
+
+export const books_queryDocument = gql`
+    query books_query($limit: Int) {
+  books(limit: $limit) {
+    authorId
+    categorieId
+    id
+    title
+  }
+}
+    ` as unknown as DocumentNode<books_queryQuery, books_queryQueryVariables>;
+export const booksCategories_queryDocument = gql`
+    query booksCategories_query($limit: Int) {
+  booksCategories(limit: $limit) {
+    id
+    name
+  }
+}
+    ` as unknown as DocumentNode<booksCategories_queryQuery, booksCategories_queryQueryVariables>;
+
+
 
 export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>
 export function getSdk<C>(requester: Requester<C>) {
   return {
-
+    books_query(variables?: books_queryQueryVariables, options?: C): Promise<books_queryQuery> {
+      return requester<books_queryQuery, books_queryQueryVariables>(books_queryDocument, variables, options);
+    },
+    booksCategories_query(variables?: booksCategories_queryQueryVariables, options?: C): Promise<booksCategories_queryQuery> {
+      return requester<booksCategories_queryQuery, booksCategories_queryQueryVariables>(booksCategories_queryDocument, variables, options);
+    }
   };
 }
 export type Sdk = ReturnType<typeof getSdk>;
